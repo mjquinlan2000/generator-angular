@@ -160,6 +160,21 @@ Generator.prototype.askForBootstrap = function askForBootstrap() {
   }.bind(this));
 };
 
+Generator.prototype.askForJade = function askForJade() {
+  var cb = this.async();
+
+  this.prompt([{
+    type: 'confirm',
+    name: 'jade',
+    message: 'Would you like to use Jade tempates instead of HTML?',
+    default: true
+  }], function (props) {
+    this.jade = props.jade;
+
+    cb();
+  }).bind(this);
+};
+
 Generator.prototype.askForModules = function askForModules() {
   var cb = this.async();
 

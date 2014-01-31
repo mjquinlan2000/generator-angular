@@ -53,6 +53,10 @@ module.exports = function (grunt) {
       styles: {
         files: ['<%%= yeoman.app %>/styles/{,*/}*.css'],
         tasks: ['newer:copy:styles', 'autoprefixer']
+      },<% } %><% if (jade) { %>
+      jade: {
+        files: ['<%%= yeoman.app %>/views/{,*/}*.jade'],
+        tasks: ['jade:compile']
       },<% } %>
       gruntfile: {
         files: ['Gruntfile.js']
@@ -64,7 +68,8 @@ module.exports = function (grunt) {
         files: [
           '<%%= yeoman.app %>/{,*/}*.html',
           '.tmp/styles/{,*/}*.css',<% if (coffee) { %>
-          '.tmp/scripts/{,*/}*.js',<% } %>
+          '.tmp/scripts/{,*/}*.js',<% } %><if (jade) { %>
+          '.tmp/views/{,*/}*.html',<% } %>
           '<%%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
         ]
       }
@@ -217,6 +222,24 @@ module.exports = function (grunt) {
       }
     },<% } %>
 
+<% if (jade) { %>
+    // Compiles Jade templates into html
+    jade: {
+      compile: {
+        options: {
+          client: false,
+          pretty: true
+        },
+        files: [{
+          cwd: '<%%= yeoman.app =>/views',
+          src: '**/*.jade',
+          dest: '.tmp/views',
+          expand: true,
+          ext: '.html'
+        }]
+      }
+    },<% } %>
+
     // Renames files for browser caching purposes
     rev: {
       dist: {
@@ -326,7 +349,12 @@ module.exports = function (grunt) {
             'images/{,*/}*.{webp}',
             'fonts/*'
           ]
-        }, {
+        },<% if(jade) { %> {
+          expand: true,
+          cwd: '.tmp/views',
+          src: '{,*/}*.html',
+          dest: '<%%= yeoman.dist %>/views'
+        },<% } %> {
           expand: true,
           cwd: '.tmp/images',
           dest: '<%%= yeoman.dist %>/images',
@@ -344,7 +372,8 @@ module.exports = function (grunt) {
     // Run some tasks in parallel to speed up the build process
     concurrent: {
       server: [<% if (coffee) { %>
-        'coffee:dist',<% } %><% if (compass) { %>
+        'coffee:dist',<% } %><%if (jade) { %>
+        'jade:compile',<% } %><% if (compass) { %>
         'compass:server'<% } else { %>
         'copy:styles'<% } %>
       ],
@@ -354,7 +383,8 @@ module.exports = function (grunt) {
         'copy:styles'<% } %>
       ],
       dist: [<% if (coffee) { %>
-        'coffee',<% } %><% if (compass) { %>
+        'coffee',<% } %><% if (jade) { %>
+        'jade:compile',<% } %><% if (compass) { %>
         'compass:dist',<% } else { %>
         'copy:styles',<% } %>
         'imagemin',
